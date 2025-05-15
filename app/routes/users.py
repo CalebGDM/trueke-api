@@ -1,7 +1,7 @@
 from flask import Blueprint, request, jsonify
 from app.models import User
 from app.extensions import db
-from flask_jwt_extended import create_access_token
+from flask_jwt_extended import create_access_token, jwt_required
 
 users = Blueprint('users', __name__)
 
@@ -15,7 +15,14 @@ def get_all_users():
         print("Error en /get-all:", e) 
         return jsonify({"error": str(e)}), 500
 
-
+@users.route('/<user_id>', methods=['GET'])
+def get_user(user_id):
+    try:
+        user = User.query.get_or_404(user_id)
+        return jsonify(user.to_json()), 200
+    except Exception as e:
+        print("Error en /get-user:", e) 
+        return jsonify({"error": str(e)}), 500
 
 @users.route('/register', methods=['POST'])
 def register():
@@ -66,3 +73,29 @@ def login():
     access_token = create_access_token(identity=user.id)
 
     return jsonify({'access_token': access_token}), 200
+
+@users.route('/<user_id>', methods=['PUT'])
+@jwt_required()
+def update_user(user_id):
+    data = request.get_json()
+    user = User.query.get_or_404(user_id)
+
+    name = data.get('name', user.name)
+    email = data.get('email', user.email)
+    profile_picture_url = data.get('profile_picture_url', user.profile_picture_url)
+    phone = data.get('phone', user.phone)
+    address = data.get('address', user.address)
+    rating = data.get('rating', user.rating)
+
+    user.name = name
+    user.email = email
+    user.profile_picture_url = profile_picture_url
+    user.phone = phone
+    user.address = address
+    user.rating = rating
+
+    db.session.commit()
+
+    return jsonify({"message": "Usuario actualizado exitosamente", "user": user.to_json()}), 200
+
+
