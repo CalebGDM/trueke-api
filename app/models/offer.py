@@ -9,7 +9,6 @@ class Offer(db.Model):
     value = db.Column(db.Float(), nullable=False)
     images_url = db.Column(db.JSON, nullable=False)
     state = db.Column(db.String(80), nullable=False)
-    category = db.Column(db.String(100), nullable=False)
     user_id = db.Column(db.String(36), db.ForeignKey('users.id'), nullable=False)
     category_id = db.Column(db.String(36), db.ForeignKey('categories.id'), nullable=False)
     ad_id = db.Column(db.String(36), db.ForeignKey('ads.id'), nullable=False)
@@ -21,7 +20,6 @@ class Offer(db.Model):
         self.value = value
         self.images_url = images_url
         self.state = state
-        self.category = category
         self.user_id = user_id
         self.category_id = category
 
