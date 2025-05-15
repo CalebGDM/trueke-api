@@ -3,6 +3,7 @@ from app.extensions import db
 from werkzeug.security import generate_password_hash, check_password_hash
 
 class User(db.Model):
+    __tablename__ = 'users'
     id = db.Column(db.String(36), primary_key=True, default=lambda: str(uuid4()))
     name = db.Column(db.String(100), nullable=False)
     email = db.Column(db.String(120), unique=True, nullable=False)
@@ -11,6 +12,7 @@ class User(db.Model):
     phone = db.Column(db.String(20), nullable=False)
     address = db.Column(db.String(400), nullable=False)
     rating = db.Column(db.Float(), nullable=False)
+    ads = db.relationship('Ad', backref='user', lazy=True)
     created_at = db.Column(db.TIMESTAMP, default=db.func.now())
 
     def __init__(self, name, email, password_hash, profile_picture_url, phone, address, rating):
