@@ -2,6 +2,7 @@ from flask import Blueprint, jsonify, request
 from flask_jwt_extended import jwt_required, get_jwt_identity
 from app.models import Offer
 from app.extensions import db
+from app.utils import upload_images
 
 offers = Blueprint('offers', __name__)
 
@@ -31,13 +32,14 @@ def get_offers_by_user(user_id):
 @offers.route('/create', methods=['POST'])
 @jwt_required()
 def create_offer():
-    data = request.get_json()
-    title = data.get('title')
-    description = data.get('description')
-    value = data.get('value')
-    images_url = data.get('images_url')
-    state = data.get('state')
-    category_id = data.get('category_id')
+    title = request.form.get('title')
+    description = request.form.get('description')
+    value = request.form.get('value')
+    images_url = upload_images(request)
+    state = request.form.get('state')
+    category_id = request.form.get('category_id')
+    ad_id = request.form.get('ad_id')
+
     user_id = get_jwt_identity()
 
     required_fields = {
@@ -60,7 +62,8 @@ def create_offer():
         images_url=images_url,
         state=state,
         user_id=user_id,
-        category_id=category_id
+        category_id=category_id,
+        ad_id=ad_id
     )
     db.session.add(offer)
     db.session.commit()
