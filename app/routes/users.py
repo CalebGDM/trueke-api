@@ -2,6 +2,9 @@ from flask import Blueprint, request, jsonify
 from app.models import User
 from app.extensions import db
 from flask_jwt_extended import create_access_token, jwt_required
+from datetime import datetime
+from werkzeug.utils import secure_filename
+from app.utils import upload_image
 
 users = Blueprint('users', __name__)
 
@@ -27,14 +30,18 @@ def get_user(user_id):
 @users.route('/register', methods=['POST'])
 def register():
     try:
-        data = request.get_json()
-        name = data.get('name')
-        email = data.get('email')
-        password = data.get('password')
-        profile_picture_url = data.get('profile_picture_url')
-        phone = data.get('phone')
-        address = data.get('address')
-        rating = data.get('rating')
+        name = request.form.get('name')
+        email = request.form.get('email')
+        password = request.form.get('password')
+        phone = request.form.get('phone')
+        address = request.form.get('address')
+
+        # Subir las imágenes
+        
+        profile_picture_url = upload_image(request)
+
+        if not profile_picture_url:
+            return jsonify({'error': 'No se pudo subir la imagen'}), 400
 
         if not name or not email or not password:
             return jsonify({'error': 'faltan datos para el registror'}), 400
@@ -46,7 +53,7 @@ def register():
             return jsonify({'error': 'Ese nombre de usuario ya está registrado'}), 400
 
         user = User(name=name, email=email, password_hash=password, profile_picture_url=profile_picture_url,
-                    phone=phone, address=address, rating=rating)
+                    phone=phone, address=address, rating=0)
         user.set_password(password)
 
         db.session.add(user)
@@ -77,22 +84,23 @@ def login():
 @users.route('/<user_id>', methods=['PUT'])
 @jwt_required()
 def update_user(user_id):
-    data = request.get_json()
+  
     user = User.query.get_or_404(user_id)
 
-    name = data.get('name', user.name)
-    email = data.get('email', user.email)
-    profile_picture_url = data.get('profile_picture_url', user.profile_picture_url)
-    phone = data.get('phone', user.phone)
-    address = data.get('address', user.address)
-    rating = data.get('rating', user.rating)
+    name = request.form.get('name', user.name)
+    email = request.form.get('email', user.email)
+ 
+    phone = request.form.get('phone', user.phone)
+    address = request.form.get('address', user.address)
+
+    profile_picture_url = upload_image(request)
 
     user.name = name
     user.email = email
     user.profile_picture_url = profile_picture_url
     user.phone = phone
     user.address = address
-    user.rating = rating
+
 
     db.session.commit()
 
