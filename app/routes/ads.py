@@ -2,6 +2,7 @@ from flask import Blueprint, request, jsonify
 from app.models import User, Ad
 from app.extensions import db
 from flask_jwt_extended import jwt_required, get_jwt_identity
+from app.utils import upload_images
 
 ads = Blueprint('ads', __name__)
 @ads.route('/', methods=['GET'])
@@ -24,16 +25,16 @@ def get_ads_by_category(category_id):
 @ads.route('/create', methods=['POST'])
 @jwt_required()
 def create_ad():
-    data = request.get_json()
-    print("Data received:", data)  # Debugging line
-    title = data.get('title')
-    description = data.get('description')
-    value = data.get('value')
-    looking = data.get('looking')
-    images_url = data.get('images_url')
-    state = data.get('state')
-    available = data.get('available')
-    category_id = data.get('category_id')
+    title = request.form.get('title')
+    description = request.form.get('description')
+    value = request.form.get('value')
+    looking = request.form.get('looking')
+    state = request.form.get('state')
+    available = True
+    category_id = request.form.get('category_id')
+
+    images_url = upload_images(request)
+    print(images_url)
 
     required_fiels = {
         'title': title,
@@ -70,17 +71,16 @@ def create_ad():
 @ads.route('/<ad_id>', methods=['PUT'])
 @jwt_required()
 def update_ad(ad_id):
-    data = request.get_json()
-    title = data.get('title')
-    description = data.get('description')
-    value = data.get('value')
-    looking = data.get('looking')
-    images_url = data.get('images_url')
-    state = data.get('state')
-    available = data.get('available')
-    category_id = data.get('category_id')
+    title = request.form.get('title')
+    description = request.form.get('description')
+    value = request.form.get('value')
+    looking = request.form.get('looking')
+    state = request.form.get('state')
+    available = request.form.get('available')
+    category_id = request.form.get('category_id')
     user_id = get_jwt_identity()
     ad = Ad.query.get_or_404(ad_id)
+    images_url = upload_images(request)
 
     if ad.user_id != user_id:
         return jsonify({'error': 'No tienes permiso para actualizar este anuncio'}), 403
