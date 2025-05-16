@@ -32,16 +32,16 @@ class Ad(db.Model):
     
     def to_json(self):
         return {
-            'id': self.id,
-            'title': self.title,
-            'description': self.description,
-            'value': self.value,
-            'looking': self.looking,
-            'images_url': self.images_url,
-            'state': self.state,
-            'available': self.available,
-            'user_id': self.user_id,
-            'category_id': self.category_id,
-            'offer_id': self.offer_id,  
-            'created_at': str(self.created_at)
+            "id": self.id,
+            "title": self.title,
+            "description": self.description,
+            "value": self.value,
+            "looking": self.looking,
+            "images_url": self.images_url,
+            "state": self.state,
+            "available": self.available,
+            "user_id": self.user_id,
+            "category_id": self.category_id,
+            "created_at": self.created_at.isoformat() if self.created_at else None,
+            "offer_id": str(self.offer_id)  # Esto es lo que causa el problema
         }
