@@ -3,7 +3,7 @@ from app.models import User
 from app.extensions import db
 from flask_jwt_extended import create_access_token, jwt_required, get_jwt
 from datetime import timedelta
-from app import blacklist
+
 
 from app.utils import upload_image
 
